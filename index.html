@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>新神榜：李云祥×敖丙 互动养成</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <style>
+        *{
+            box-sizing:border-box;
+            margin:0;
+            padding:0;
+            font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+        }
+        body{
+            background: linear-gradient(135deg, #121a2f, #1e1e3f, #291c3a);
+            color:#e8e8ed;
+            padding:20px;
+            max-width:600px;
+            margin:30px auto;
+            line-height:1.6;
+            min-height:100vh;
+        }
+        .status{
+            background:rgba(255,255,255,0.08);
+            padding:18px;
+            border-radius:16px;
+            margin-bottom:18px;
+            font-size:14px;
+            color:#c8d8e8;
+            border:1px solid rgba(255,255,255,0.1);
+            box-shadow:0 4px 15px rgba(0,0,0,0.2);
+        }
+        .dialog{
+            min-height:80px;
+            padding:20px;
+            background:rgba(255,255,255,0.06);
+            border-radius:16px;
+            margin-bottom:20px;
+            font-size:15px;
+            border:1px solid rgba(255,255,255,0.08);
+            box-shadow:0 4px 15px rgba(0,0,0,0.15);
+            white-space: pre-line;
+        }
+        .btn{
+            display:block;
+            width:100%;
+            padding:14px;
+            margin:10px 0;
+            background:rgba(255,255,255,0.08);
+            color:#fff;
+            border:none;
+            border-radius:14px;
+            text-align:center;
+            cursor:pointer;
+            font-size:15px;
+            transition:all 0.25s ease;
+            border:1px solid rgba(255,255,255,0.1);
+        }
+        .btn:hover{
+            background:rgba(255,255,255,0.15);
+            transform:translateY(-2px);
+            box-shadow:0 5px 12px rgba(0,0,0,0.2);
+        }
+        .back{
+            background:rgba(124, 68, 173, 0.3);
+        }
+        .interact{
+            background:rgba(58, 165, 86, 0.3);
+        }
+        .ride{
+            background:rgba(196, 69, 105, 0.35);
+        }
+        .skip{
+            background:rgba(214, 48, 49, 0.35);
+        }
+        .title{
+            text-align:center;
+            font-size:22px;
+            margin-bottom:20px;
+            color:#fff;
+            font-weight:bold;
+        }
+    </style>
+</head>
+<body>
+
+<div class="title">新神榜 · 红莲同行</div>
+<div class="status" id="status"></div>
+<div class="dialog" id="dialog"></div>
+<div id="buttons"></div>
+
+<script>
+// ================== 游戏数值 ==================
+const game = {
+  control: null,
+  lyx: { full:10, mood:10 },
+  ab:  { full:10, mood:10 },
+  like: { lyxToAb:0, abToLyx:0 }
+};
+
+// ================== 李云祥 ==================
+const liyunxiang = {
+  name: "李云祥",
+  foods: [
+    {n:"烤肉",t:"like",f:18,m:12},
+    {n:"能量饮料",t:"like",f:10,m:14},
+    {n:"海鲜炒饭",t:"normal",f:12,m:6},
+    {n:"机械零件糖",t:"normal",f:8,m:5},
+    {n:"水果拼盘",t:"hate",f:-5,m:-7},
+    {n:"精致甜点",t:"hate",f:-6,m:-9}
+  ],
+  text: {
+    like: "（接过直接吃）够味，谢了。",
+    normal: "还行，能填肚子。",
+    hate: "太腻太甜，我不吃。 (¬_¬)",
+    idle: "……有点饿了。"
+  },
+  interactList() {
+    const l = game.like.lyxToAb;
+    if (l < 10) {
+      return [
+        "李云祥：喂，你在这儿干嘛？\n敖丙：与你这凡人无关。",
+        "李云祥：我就是路过。\n敖丙：离我龙族之地远点。",
+        "李云祥：别挡路。\n敖丙：放肆，敢对我如此说话。 (¬_¬)"
+      ];
+    }
+    if (l < 25) {
+      return [
+        "李云祥：来找你待一会儿。\n敖丙：呵，居然会主动找我。 (¬ω¬)",
+        "李云祥：今天机车没什么问题。\n敖丙：凡俗之物，也值得你摆弄。",
+        "李云祥：这里安静。\n敖丙：算你有眼光，敢来我这里。"
+      ];
+    }
+    if (l < 50) {
+      return [
+        "李云祥：今天没什么事，陪你一下。\n敖丙：姑且允许你留下。",
+        "李云祥：水畔这边挺舒服的。\n敖丙：此乃我龙族地界，自然不俗。",
+        "李云祥：跟你待着不烦。\n敖丙：哼，算你识相。 (¬_¬)"
+      ];
+    }
+    return [
+      "李云祥：我只想来找你。\n敖丙：（挑眉）这还差不多。 (¬ω¬)",
+      "李云祥：以后我常来。\n敖丙：记得准时，别让我等。",
+      "李云祥：跟你在一起最安心。\n敖丙：（别过脸）……仅此而已。 (⁄⁄•⁄ω⁄•⁄⁄)"
+    ];
+  },
+  interact() {
+    const list = this.interactList();
+    const res = list[Math.floor(Math.random() * list.length)];
+    game.like.lyxToAb += 3;
+    game.like.abToLyx += 2;
+    return res;
+  },
+  rideList() {
+    const l = game.like.lyxToAb;
+    if (l < 20) {
+      return [
+        "李云祥：走，带你骑红莲兜风。",
+        "敖丙：荒唐！本少爷才不坐凡人的交通工具。 (¬_¬)",
+        "李云祥：少啰嗦，上来！",
+        "敖丙：……切，仅此一次。",
+        "（引擎轰鸣）",
+        "敖丙：喂！开稳一点！",
+        "李云祥：怕了？",
+        "敖丙：谁怕了！我只是不想和你一起摔出去！ (¬ω¬)"
+      ];
+    }
+    if (l < 50) {
+      return [
+        "李云祥：上来，我带你走。",
+        "敖丙：……算你勉强合格。",
+        "（风掠过耳畔）",
+        "敖丙：（低声）速度……还不差。",
+        "李云祥：那是自然。",
+        "敖丙：（别过头）哼，姑且陪你一次。 (¬_¬)"
+      ];
+    }
+    return [
+      "李云祥：抱紧，我带你飞驰。",
+      "敖丙：（耳尖微热）……知道了。 (⁄⁄•⁄ω⁄•⁄⁄)",
+      "（红莲掠过街道，风声安静）",
+      "敖丙：……原来，和你一起是这种感觉。",
+      "李云祥：以后，我都带你。",
+      "敖丙：（轻声）……好。 (´▽｀)"
+    ];
+  }
+};
+
+// ================== 敖丙 嚣张跋扈 ==================
+const aobing = {
+  name: "敖丙",
+  foods: [
+    {n:"清润灵果",t:"like",f:14,m:16},
+    {n:"鲜鱼汤",t:"like",f:15,m:14},
+    {n:"冰晶甜点",t:"normal",f:10,m:7},
+    {n:"海味小食",t:"normal",f:9,m:6},
+    {n:"油炸小吃",t:"hate",f:-6,m:-10},
+    {n:"重口味烧烤",t:"hate",f:-7,m:-12}
+  ],
+  text: {
+    like: "（轻瞥一眼）勉强入口，赏脸收下。",
+    normal: "凑合，不必多此一举。",
+    hate: "粗俗油腻，也配给我吃？ (¬_¬)",
+    idle: "……动作快点，本少爷没耐心。"
+  },
+  interactList() {
+    const a = game.like.abToLyx;
+    if (a < 10) {
+      return [
+        "敖丙：凡人，离我远点。 (¬_¬)\n李云祥：你少嚣张。",
+        "敖丙：又在摆弄那破铜烂铁？\n李云祥：总比你高高在上好。",
+        "敖丙：吵到我休息，赔得起吗？\n李云祥：不讲理。"
+      ];
+    }
+    if (a < 25) {
+      return [
+        "敖丙：今日无事，姑且见你。\n李云祥：谁稀罕。 (¬ω¬)",
+        "敖丙：别惹事，我懒得护你。\n李云祥：我不用你护。",
+        "敖丙：站远点，别碰我地界。\n李云祥：……知道了。"
+      ];
+    }
+    if (a < 50) {
+      return [
+        "敖丙：过来，陪我一会儿。\n李云祥：……来了。",
+        "敖丙：看你安分，便允许你留下。\n李云祥：谢了。",
+        "敖丙：你还算有点意思。 (¬ω¬)\n李云祥：彼此彼此。"
+      ];
+    }
+    return [
+      "敖丙：除了我，不准找别人。\n李云祥：……好。 (⁄⁄•⁄ω⁄•⁄⁄)",
+      "敖丙：既然你想陪我，我便成全。\n李云祥：明明是你来找我。",
+      "敖丙：记住，只有我能这般对你。\n李云祥：（耳尖发烫）……嗯。"
+    ];
+  },
+  interact() {
+    const list = this.interactList();
+    const res = list[Math.floor(Math.random() * list.length)];
+    game.like.abToLyx += 3;
+    game.like.lyxToAb += 2;
+    return res;
+  }
+};
+
+// ================== 游戏流程 ==================
+start();
+
+function start(){
+  refresh();
+  msg("请选择你要控制的角色：");
+  btn([
+    {t:"控制李云祥",a:()=>enter("lyx")},
+    {t:"控制敖丙",a:()=>enter("ab")}
+  ]);
+}
+
+function enter(role){
+  game.control = role;
+  const name = role==="lyx" ? liyunxiang.name : aobing.name;
+  refresh();
+  msg(`当前控制：${name}`);
+  
+  let btnList = [
+    {t:"喂食",a:feedMenu},
+    {t:"互动",a:doInteract,c:"interact"}
+  ];
+
+  if(role === "lyx"){
+    btnList.push({t:"带敖丙骑红莲",a:startRide,c:"ride"});
+  } else {
+    btnList.push({t:"乘坐红莲摩托",a:startRide,c:"ride"});
+  }
+
+  btnList.push({t:"返回选择角色",a:start,c:"back"});
+  btn(btnList);
+}
+
+function feedMenu(){
+  const c = game.control==="lyx" ? liyunxiang : aobing;
+  const btns = c.foods.map(i=>({t:`投喂 ${i.n}`,a:()=>eat(i)}));
+  btns.push({t:"返回上一页",a:()=>enter(game.control),c:"back"});
+  btn(btns);
+  msg(c.text.idle);
+}
+
+function eat(f){
+  const c = game.control==="lyx" ? liyunxiang : aobing;
+  const tar = game.control==="lyx" ? game.lyx : game.ab;
+  tar.full = Math.max(0, tar.full + f.f);
+  tar.mood = Math.max(0, tar.mood + f.m);
+  refresh();
+  msg(c.text[f.t]);
+  setTimeout(feedMenu, 3000);
+}
+
+function doInteract(){
+  const txt = game.control==="lyx" ? liyunxiang.interact() : aobing.interact();
+  refresh();
+  msg(txt);
+  setTimeout(()=>enter(game.control), 1800);
+}
+
+// ========== 红莲摩托：加载画面 + 跳过 ==========
+function startRide(){
+  if(game.lyx.mood < 10){
+    msg("现在心情太低，不想骑摩托。");
+    setTimeout(()=>enter(game.control),1500);
+    return;
+  }
+
+  msg("红莲引擎启动中...")
+  btn([{t:"跳过加载",a:playStory,c:"skip"}])
+  let autoPlay = setTimeout(playStory, 2000)
+
+  function playStory(){
+    clearTimeout(autoPlay)
+    const lines = liyunxiang.rideList();
+    btn([{t:"跳过剧情",a:finishStory,c:"skip"}])
+    let i = 0
+    function next(){
+      if(i >= lines.length){ finishStory(); return }
+      msg(lines[i])
+      i++
+      setTimeout(next, 1600)
+    }
+    next()
+  }
+
+  function finishStory(){
+    clearTimeout(autoPlay)
+    game.lyx.mood +=10
+    game.ab.mood +=8
+    game.like.lyxToAb +=5
+    game.like.abToLyx +=5
+    refresh()
+    msg("红莲兜风结束，彼此的距离更近了。")
+    setTimeout(()=>enter(game.control),2000)
+  }
+}
+
+// ================== 界面工具 ==================
+function refresh(){
+  document.getElementById("status").innerText =
+`李云祥｜饱腹：${game.lyx.full} 心情：${game.lyx.mood}
+敖丙  ｜饱腹：${game.ab.full} 心情：${game.ab.mood}
+李云祥→敖丙：${game.like.lyxToAb} ｜ 敖丙→李云祥：${game.like.abToLyx}`;
+}
+
+function msg(text){
+  document.getElementById("dialog").innerText = text;
+}
+
+function btn(list){
+  const box = document.getElementById("buttons");
+  box.innerHTML = "";
+  list.forEach(b=>{
+    let e = document.createElement("button");
+    e.className = "btn" + (b.c?" "+b.c:"");
+    e.innerText = b.t;
+    e.onclick = b.a;
+    box.appendChild(e);
+  });
+}
+</script>
+</body>
+</html>
